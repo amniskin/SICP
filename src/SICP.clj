@@ -429,12 +429,12 @@
 	(print ")")
 	(println))
 (defn midpoint-segment [l]
-	(print-point (make-point (/ (+ 
-		(x-point (start-segment l))
-		(x-point (end-segment l))) 2)
-	(/ (+ 
-		(y-point (start-segment l))
-		(y-point (end-segment l))) 2))))
+	(make-point (/ (+ (x-point (start-segment l))
+                          (x-point (end-segment l)))
+                       2)
+                    (/ (+ (y-point (start-segment l))
+                          (y-point (end-segment l)))
+                       2)))
 
 ;2.3 decided to make this one for any parallelogram rather 
 ;	than just for rectangles. It's simpler and a bit more general.
@@ -526,7 +526,7 @@
 (def one (fn [f] (fn [x] (f x))))
 (def two 
  	(fn [f] (fn [x] (f (f x)))))
-(defn plus-numeral [a b] ;(would take the place of defining +1)
+(defn add-numbers [a b] ;(would take the place of defining +1)
  (fn [f] (fn [x] ((compose (a f) (b f)) x))))
 
 ;2.7
@@ -663,7 +663,68 @@
                      coin-values))))
 (def us-coins (list 50 25 10 5 1))
 (def uk-coins (list 100 50 20 10 5 2 1 0.5))
+;It does matter. If the lists were reversed there would be over-counting.
+; For instance, let's assume that the lists were reversed, (cc 7 us-coins)
+; would count for the case where we have one nickel and two pennies three times.
+
+
+;2.20
+(defn same-parity [x & y]
+  (def parity (mod x 2))
+  (defn find-parity [so-far left-over]
+    (cond  (= left-over (list )) 
+              so-far
+           (= (mod (first left-over) 2) parity) 
+              (find-parity (concat so-far (list (first left-over))) (rest left-over))
+           :else (find-parity so-far (rest left-over))))
+  (find-parity (list x) y))
 
 
 
+
+
+;2.21
+(defn square-list-1 [items]
+  (if (= items (list )) nil
+      (cons (square (first items)) (square-list-1 (rest items)))))
+(defn square-list-2 [items]
+  (map square items))
+
+
+
+
+;2.22
+;because every new item from the "items" list is added in the leftmost position in the
+; answer list. So the order is reversed.
+;In the second way, she doesn't have nil in the last position.
+
+
+;2.23
+
+
+(defn for-each [function items]
+  (if (= (first (rest items)) nil) (function (first items))
+      (do (function (first items)) (for-each function (rest items)))))
+
+
+;2.24
+; (cons 1 (cons 2 (cons 3 (cons 4 nil))))
+
+;2.25
+; cdrs => cdrs => cars => cdrs
+; cars => cars
+; cdrs => cdrs => cdrs => cdrs => cdrs => cdrs
+
+;2.26
+; (list 1 2 3 4 5 6)= (cons 1 (cons 2 ... ))
+; ((list 1 2 3) 4 5 6)
+; ((list 1 2 3) (cons (cons 4 (cons 5 (cons 6 nil))) nil))
+
+;2.27
+(defn deep-reverse [items]
+  (cond (and (seq? items) (not (null? (rest items))))
+          (list (deep-reverse (rest items)) (deep-reverse (first items)))
+        (and (seq? items) (null? (rest items)))
+          (deep-reverse (first items))
+        :else items))
 
